@@ -62,7 +62,7 @@ def predict_sentiment(text_input):
     """Predict sentiment for the given text input."""
     # Load pre-trained model and vectorizer
     try:
-        model = joblib.load('model/naive_bayes_model.pkl')
+        model = joblib.load('model/random_forest_91.pkl')
         vectorizer = joblib.load('model/tfidf_vectorizer.pkl')
     except FileNotFoundError:
         st.error("Pre-trained model or vectorizer not found. Please upload the necessary files.")
@@ -71,7 +71,7 @@ def predict_sentiment(text_input):
     # Vectorize the input text using the same vectorizer as used during training
     X = vectorizer.transform([text_input])
     
-    # Predict sentiment using the Naive Bayes model
+    # Predict sentiment using the Random Forest model
     prediction = model.predict(X)
     return 'Positive' if prediction == 0 else 'Negative'
 
@@ -79,10 +79,10 @@ def show_sections(df):
 
     # Section: Sentiment Analysis
     with st.expander("Sentiment Analysis"):
-        st.write("This section performs sentiment analysis using Naive Bayes with a 90:10 Train-Test Split.")
+        st.write("This section performs sentiment analysis using Random Forest with a 90:10 Train-Test Split.")
         
         try:
-            model = joblib.load('model/naive_bayes_model.pkl')
+            model = joblib.load('model/random_forest_91.pkl')
             vectorizer = joblib.load('model/tfidf_vectorizer.pkl')
         except FileNotFoundError:
             st.error("Pre-trained model or vectorizer not found. Please upload the necessary files.")
@@ -93,7 +93,7 @@ def show_sections(df):
             # Vectorize the content using the same vectorizer as used during training
             X = vectorizer.transform(df['content'])
             
-            # Predict sentiment using the Naive Bayes model
+            # Predict sentiment using the Random Forest model
             predictions = model.predict(X)
             
             # Add predictions to the dataframe
@@ -118,12 +118,48 @@ def show_sections(df):
 
     # Section: Dropdown for Visualizations
     with st.expander("Visualizations"):
-        st.write("This section can contain visualizations like word clouds or graphs.")
-        # Example of a word cloud visualization
-        text = "Sample text for word cloud generation."
-        wordcloud = WordCloud().generate(text)
-        plt.imshow(wordcloud, interpolation="bilinear")
-        plt.axis("off")
+        st.write("This section contains visualizations of the label distribution and WordCloud for each sentiment.")
+        
+        # Label Distribution Bar Chart
+        st.subheader("Distribusi Label pada Dataset")
+        label_counts = df['predicted_label'].value_counts()
+
+        # Determine colors for Positive (green) and Negative (red)
+        colors = ['green' if label == 'Positive' else 'red' for label in label_counts.index]
+
+        # Create bar chart
+        plt.figure(figsize=(8, 4))
+        ax = label_counts.plot(kind='bar', color=colors, edgecolor='black')
+
+        # Add labels and title
+        plt.title("Distribusi Label pada Dataset", fontsize=14)
+        plt.xlabel("Label", fontsize=12)
+        plt.ylabel("Jumlah", fontsize=12)
+
+        # Add counts on top of each bar
+        for i, v in enumerate(label_counts):
+            ax.text(i, v + 0.5, str(v), ha='center', va='bottom', fontsize=12)
+
+        # Show bar chart
+        plt.xticks(rotation=0)
+        st.pyplot(plt)
+
+        # WordCloud for Positive Labels
+        st.subheader("WordCloud for Positive Labels")
+        positive_text = ' '.join(df[df['predicted_label'] == 'Positive']['content'])
+        wordcloud_positive = WordCloud(width=800, height=400, background_color='white').generate(positive_text)
+        plt.figure(figsize=(10, 5))
+        plt.imshow(wordcloud_positive, interpolation='bilinear')
+        plt.axis('off')
+        st.pyplot(plt)
+
+        # WordCloud for Negative Labels
+        st.subheader("WordCloud for Negative Labels")
+        negative_text = ' '.join(df[df['predicted_label'] == 'Negative']['content'])
+        wordcloud_negative = WordCloud(width=800, height=400, background_color='black', colormap='Reds').generate(negative_text)
+        plt.figure(figsize=(10, 5))
+        plt.imshow(wordcloud_negative, interpolation='bilinear')
+        plt.axis('off')
         st.pyplot(plt)
 
 def style_sentiment(sentiment):
