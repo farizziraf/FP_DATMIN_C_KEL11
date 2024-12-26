@@ -62,7 +62,7 @@ def predict_sentiment(text_input):
     """Predict sentiment for the given text input."""
     # Load pre-trained model and vectorizer
     try:
-        model = joblib.load('model/random_forest_91.pkl')
+        model = joblib.load('model/naive_bayes_model.pkl')
         vectorizer = joblib.load('model/tfidf_vectorizer.pkl')
     except FileNotFoundError:
         st.error("Pre-trained model or vectorizer not found. Please upload the necessary files.")
@@ -82,7 +82,7 @@ def show_sections(df):
         st.write("This section performs sentiment analysis using Random Forest with a 90:10 Train-Test Split.")
         
         try:
-            model = joblib.load('model/random_forest_91.pkl')
+            model = joblib.load('model/naive_bayes_model.pkl')
             vectorizer = joblib.load('model/tfidf_vectorizer.pkl')
         except FileNotFoundError:
             st.error("Pre-trained model or vectorizer not found. Please upload the necessary files.")
